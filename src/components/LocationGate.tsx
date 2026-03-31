@@ -21,7 +21,7 @@ const LocationGate = ({ children }: { children: React.ReactNode }) => {
     return <>{children}</>;
   }
 
-  // idle — show the gate
+  // blocked — show the gate
   return (
     <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-background px-6 text-center">
       {/* Animated pin icon */}
