@@ -15,7 +15,6 @@ import SalonSwitchModal from "@/components/SalonSwitchModal";
 import GenderBackground from "@/components/GenderBackground";
 import FlutterBridge from "@/components/FlutterBridge";
 import PullToRefresh from "@/components/PullToRefresh";
-import LocationGate from "@/components/LocationGate";
 
 /* Route-level code splitting — reduces initial JS parse time */
 const Index = lazy(() => import("./pages/Index"));
@@ -43,7 +42,6 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <FlutterBridge />
-          <LocationGate />
           {/* Root shell: flex column, fills viewport, no 100vh */}
           <div className="relative flex flex-col h-full overflow-hidden">
             {/* Edge-to-edge background */}

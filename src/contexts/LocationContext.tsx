@@ -23,7 +23,7 @@ const DEFAULT_LOCATION: LocationData = {
   areaName: undefined,
   lat: undefined,
   lng: undefined,
-  source: 'gps' as const, // not 'manual' — forces LocationGate to show until real location is obtained
+  source: 'manual',
 };
 
 const LocationContext = createContext<LocationContextType>({
