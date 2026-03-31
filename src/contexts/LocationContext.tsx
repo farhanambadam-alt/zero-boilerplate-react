@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, useRef, type ReactNode } from 'react';
 import { olaReverseGeocode } from '@/services/olaMapService';
 export interface LocationData {
   cityName: string;
@@ -28,6 +28,9 @@ const DEFAULT_LOCATION: LocationData = {
   lng: undefined,
   source: 'manual',
 };
+
+const STARTUP_GEOLOCATION_TIMEOUT_MS = 6000;
+const STARTUP_GEOLOCATION_RETRY_COUNT = 1; // 1 retry => 2 total attempts
 
 const LocationContext = createContext<LocationContextType>({
   location: DEFAULT_LOCATION,
@@ -82,6 +85,7 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
 
   // Always start as 'checking' — validate real device state before rendering
   const [locationStatus, setLocationStatus] = useState<LocationStatus>('checking');
+  const startupValidationIdRef = useRef(0);
 
   useEffect(() => {
     localStorage.setItem('user_location', JSON.stringify(location));
@@ -89,27 +93,67 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
 
   // Startup validation: silently verify real device location state.
   useEffect(() => {
-    if (!navigator.geolocation) {
+    let isActive = true;
+    const validationId = ++startupValidationIdRef.current;
+
+    const isStaleValidation = () => !isActive || startupValidationIdRef.current !== validationId;
+
+    const markReady = (coords: GeolocationCoordinates) => {
+      if (isStaleValidation()) return;
+
+      // Single source of truth: runtime geolocation result
+      setLocationState((prev) => ({
+        ...prev,
+        lat: coords.latitude,
+        lng: coords.longitude,
+        source: prev.source === 'flutter' ? 'flutter' : 'gps',
+      }));
+      setLocationStatus('ready');
+    };
+
+    const markBlocked = () => {
+      if (isStaleValidation()) return;
+
+      // Hard reset only after all startup attempts fail
       localStorage.removeItem('user_location');
       setLocationState(DEFAULT_LOCATION);
       setLocationStatus('blocked');
-      return;
-    }
+    };
 
-    navigator.geolocation.getCurrentPosition(
-      () => {
-        // Location is available — keep persisted data, mark ready
-        setLocationStatus('ready');
-      },
-      () => {
-        // Location unavailable — reset and block
-        localStorage.removeItem('user_location');
-        setLocationState(DEFAULT_LOCATION);
-        setLocationStatus('blocked');
-      },
-      { enableHighAccuracy: false, timeout: 3000, maximumAge: 60000 }
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const geolocate =
+      () =>
+      new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: false,
+          timeout: STARTUP_GEOLOCATION_TIMEOUT_MS,
+          maximumAge: 0,
+        });
+      });
+
+    const runStartupValidation = async () => {
+      if (!navigator.geolocation) {
+        markBlocked();
+        return;
+      }
+
+      for (let attempt = 0; attempt <= STARTUP_GEOLOCATION_RETRY_COUNT; attempt += 1) {
+        try {
+          const position = await geolocate();
+          markReady(position.coords);
+          return;
+        } catch {
+          if (attempt === STARTUP_GEOLOCATION_RETRY_COUNT) {
+            markBlocked();
+          }
+        }
+      }
+    };
+
+    void runStartupValidation();
+
+    return () => {
+      isActive = false;
+    };
   }, []); // Run once on mount only
 
   const setLocation = useCallback((loc: LocationData) => {
