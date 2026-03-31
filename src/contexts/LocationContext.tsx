@@ -9,8 +9,11 @@ export interface LocationData {
   fullAddress?: string;
 }
 
+export type LocationStatus = 'checking' | 'idle' | 'ready';
+
 interface LocationContextType {
   location: LocationData;
+  locationStatus: LocationStatus;
   setLocation: (loc: LocationData) => void;
   requestGPSLocation: () => void;
   requestEnableLocationServices: () => void;
@@ -28,6 +31,7 @@ const DEFAULT_LOCATION: LocationData = {
 
 const LocationContext = createContext<LocationContextType>({
   location: DEFAULT_LOCATION,
+  locationStatus: 'checking',
   setLocation: () => {},
   requestGPSLocation: () => {},
   requestEnableLocationServices: () => {},
