@@ -15,6 +15,7 @@ import SalonSwitchModal from "@/components/SalonSwitchModal";
 import GenderBackground from "@/components/GenderBackground";
 import FlutterBridge from "@/components/FlutterBridge";
 import PullToRefresh from "@/components/PullToRefresh";
+import LocationGate from "@/components/LocationGate";
 
 /* Route-level code splitting — reduces initial JS parse time */
 const Index = lazy(() => import("./pages/Index"));
