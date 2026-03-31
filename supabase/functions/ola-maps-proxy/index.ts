@@ -13,8 +13,8 @@ async function getOAuthToken(): Promise<string> {
     return cachedToken.token;
   }
 
-  const clientId = Deno.env.get("OLA_CLIENT_ID") || Deno.env.get("MAPPLS_CLIENT_ID");
-  const clientSecret = Deno.env.get("OLA_CLIENT_SECRET") || Deno.env.get("MAPPLS_CLIENT_SECRET");
+  const clientId = Deno.env.get("OLA_CLIENT_ID");
+  const clientSecret = Deno.env.get("OLA_CLIENT_SECRET");
 
   if (!clientId || !clientSecret) {
     throw new Error("OAuth credentials not configured");
