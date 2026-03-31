@@ -80,17 +80,8 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
   const [isLocating, setIsLocating] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
 
-  // Determine initial status: if we have persisted coords, start as 'checking'; otherwise 'idle'
-  const [locationStatus, setLocationStatus] = useState<LocationStatus>(() => {
-    try {
-      const stored = localStorage.getItem('user_location');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (parsed.lat && parsed.lng) return 'checking';
-      }
-    } catch { /* ignore */ }
-    return 'idle';
-  });
+  // Always start as 'checking' — validate real device state before rendering
+  const [locationStatus, setLocationStatus] = useState<LocationStatus>('checking');
 
   useEffect(() => {
     localStorage.setItem('user_location', JSON.stringify(location));
