@@ -43,6 +43,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <FlutterBridge />
+          <LocationGate />
           {/* Root shell: flex column, fills viewport, no 100vh */}
           <div className="relative flex flex-col h-full overflow-hidden">
             {/* Edge-to-edge background */}
