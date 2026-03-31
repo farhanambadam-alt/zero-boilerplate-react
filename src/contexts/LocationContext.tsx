@@ -125,6 +125,9 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
   const setLocation = useCallback((loc: LocationData) => {
     setLocationState(loc);
     setLocationError(null);
+    if (loc.lat && loc.lng) {
+      setLocationStatus('ready');
+    }
   }, []);
 
   /**
