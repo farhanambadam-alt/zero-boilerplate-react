@@ -80,24 +80,42 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
   const [isLocating, setIsLocating] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
 
+  // Determine initial status: if we have persisted coords, start as 'checking'; otherwise 'idle'
+  const [locationStatus, setLocationStatus] = useState<LocationStatus>(() => {
+    try {
+      const stored = localStorage.getItem('user_location');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed.lat && parsed.lng) return 'checking';
+      }
+    } catch { /* ignore */ }
+    return 'idle';
+  });
+
   useEffect(() => {
     localStorage.setItem('user_location', JSON.stringify(location));
   }, [location]);
 
   // Startup validation: silently verify location is still accessible.
-  // If permission is revoked or GPS is off, reset to DEFAULT so LocationGate re-appears.
   useEffect(() => {
-    // Only validate if we have a persisted location with coords
-    if (!location.lat || !location.lng) return;
-    if (!navigator.geolocation) return;
+    if (locationStatus !== 'checking') return;
+    if (!navigator.geolocation) {
+      localStorage.removeItem('user_location');
+      setLocationState(DEFAULT_LOCATION);
+      setLocationStatus('idle');
+      return;
+    }
 
-    // Silent geolocation check — only reset if it actually fails
     navigator.geolocation.getCurrentPosition(
-      () => { /* still valid, keep persisted state */ },
       () => {
-        // Geolocation truly unavailable (GPS off or permission denied)
+        // Still valid — mark ready
+        setLocationStatus('ready');
+      },
+      () => {
+        // Geolocation unavailable — reset
         localStorage.removeItem('user_location');
         setLocationState(DEFAULT_LOCATION);
+        setLocationStatus('idle');
       },
       { timeout: 5000, maximumAge: 60000 }
     );
