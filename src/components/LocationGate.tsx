@@ -23,7 +23,7 @@ const LocationGate = () => {
   return (
     <Dialog open={!hasLocation}>
       <DialogContent
-        className="max-w-[340px] rounded-3xl border-border/50 bg-card p-8 text-center shadow-2xl [&>button]:hidden"
+        className="max-w-[340px] rounded-3xl border-border/50 bg-card p-8 text-center shadow-2xl [&>button.absolute]:hidden"
         onPointerDownOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
       >
