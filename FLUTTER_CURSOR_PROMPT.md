@@ -240,7 +240,7 @@ onWebViewCreated: (controller) {
       final bool active = args.isNotEmpty && args[0] == true;
       debugPrint('Map active: $active');
       // When map is active, avoid intercepting touch events so the user
-      // can pan/zoom the Mappls map inside the WebView.
+      // can pan/zoom the Ola map inside the WebView.
       // Optionally disable pull-to-refresh or swipe-back gestures here.
     },
   );
