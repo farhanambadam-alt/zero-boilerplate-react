@@ -80,6 +80,60 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem('user_location', JSON.stringify(location));
   }, [location]);
 
+  // Startup validation: silently verify location is still accessible.
+  // If permission is revoked or GPS is off, reset to DEFAULT so LocationGate re-appears.
+  useEffect(() => {
+    // Only validate if we have a persisted location with coords
+    if (!location.lat || !location.lng) return;
+
+    // Use Permissions API if available (non-blocking, no popup)
+    if (navigator.permissions && navigator.permissions.query) {
+      navigator.permissions.query({ name: 'geolocation' }).then((result) => {
+        if (result.state === 'denied') {
+          localStorage.removeItem('user_location');
+          setLocationState(DEFAULT_LOCATION);
+        } else if (result.state === 'granted') {
+          // Permission exists — do a quick position check to verify GPS is on
+          navigator.geolocation.getCurrentPosition(
+            () => { /* still valid, do nothing */ },
+            () => {
+              // GPS off or error — reset
+              localStorage.removeItem('user_location');
+              setLocationState(DEFAULT_LOCATION);
+            },
+            { timeout: 5000, maximumAge: 0 }
+          );
+        }
+        // 'prompt' state — don't auto-trigger, just reset to force gate
+        else {
+          localStorage.removeItem('user_location');
+          setLocationState(DEFAULT_LOCATION);
+        }
+      }).catch(() => {
+        // Permissions API failed — fall back to quick geolocation check
+        navigator.geolocation?.getCurrentPosition(
+          () => {},
+          () => {
+            localStorage.removeItem('user_location');
+            setLocationState(DEFAULT_LOCATION);
+          },
+          { timeout: 5000, maximumAge: 0 }
+        );
+      });
+    } else if (navigator.geolocation) {
+      // No Permissions API — try a quick silent check
+      navigator.geolocation.getCurrentPosition(
+        () => {},
+        () => {
+          localStorage.removeItem('user_location');
+          setLocationState(DEFAULT_LOCATION);
+        },
+        { timeout: 5000, maximumAge: 0 }
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run once on mount only
+
   const setLocation = useCallback((loc: LocationData) => {
     setLocationState(loc);
     setLocationError(null);
