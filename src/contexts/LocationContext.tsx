@@ -273,7 +273,7 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <LocationContext.Provider
-      value={{ location, setLocation, requestGPSLocation, requestEnableLocationServices, isLocating, locationError }}
+      value={{ location, locationStatus, setLocation, requestGPSLocation, requestEnableLocationServices, isLocating, locationError }}
     >
       {children}
     </LocationContext.Provider>
