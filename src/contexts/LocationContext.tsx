@@ -87,28 +87,27 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem('user_location', JSON.stringify(location));
   }, [location]);
 
-  // Startup validation: silently verify location is still accessible.
+  // Startup validation: silently verify real device location state.
   useEffect(() => {
-    if (locationStatus !== 'checking') return;
     if (!navigator.geolocation) {
       localStorage.removeItem('user_location');
       setLocationState(DEFAULT_LOCATION);
-      setLocationStatus('idle');
+      setLocationStatus('blocked');
       return;
     }
 
     navigator.geolocation.getCurrentPosition(
       () => {
-        // Still valid — mark ready
+        // Location is available — keep persisted data, mark ready
         setLocationStatus('ready');
       },
       () => {
-        // Geolocation unavailable — reset
+        // Location unavailable — reset and block
         localStorage.removeItem('user_location');
         setLocationState(DEFAULT_LOCATION);
-        setLocationStatus('idle');
+        setLocationStatus('blocked');
       },
-      { timeout: 5000, maximumAge: 60000 }
+      { enableHighAccuracy: false, timeout: 3000, maximumAge: 60000 }
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Run once on mount only
