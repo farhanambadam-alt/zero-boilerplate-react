@@ -1,16 +1,27 @@
 import { useLocation_ } from '@/contexts/LocationContext';
-import { MapPin, Navigation } from 'lucide-react';
+import { MapPin, Navigation, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const LocationGate = ({ children }: { children: React.ReactNode }) => {
-  const { location, requestGPSLocation, isLocating, locationError } = useLocation_();
+  const { location, locationStatus, requestGPSLocation, isLocating, locationError } = useLocation_();
 
   const hasLocation = !!(location.lat && location.lng);
 
-  if (hasLocation) {
+  // Still checking — show a neutral loading screen, no gate flash
+  if (locationStatus === 'checking') {
+    return (
+      <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-background">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Location is ready or coords exist
+  if (locationStatus === 'ready' || hasLocation) {
     return <>{children}</>;
   }
 
+  // idle — show the gate
   return (
     <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-background px-6 text-center">
       {/* Animated pin icon */}
