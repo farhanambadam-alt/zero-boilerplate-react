@@ -72,7 +72,7 @@ const AppHeader = ({
           Welcome back
         </p>
         <p className="font-heading font-bold text-[15px] text-foreground mt-0.5 tracking-tight">
-          Aarav
+          Aaraav
         </p>
       </div>
     </button>
