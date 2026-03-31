@@ -9,7 +9,7 @@ export interface LocationData {
   fullAddress?: string;
 }
 
-export type LocationStatus = 'checking' | 'idle' | 'ready';
+export type LocationStatus = 'checking' | 'blocked' | 'ready';
 
 interface LocationContextType {
   location: LocationData;
