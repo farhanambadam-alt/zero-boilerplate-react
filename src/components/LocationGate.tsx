@@ -3,9 +3,7 @@ import { MapPin, Navigation, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const LocationGate = ({ children }: { children: React.ReactNode }) => {
-  const { location, locationStatus, requestGPSLocation, isLocating, locationError } = useLocation_();
-
-  const hasLocation = !!(location.lat && location.lng);
+  const { locationStatus, requestGPSLocation, isLocating, locationError } = useLocation_();
 
   // Still checking — show a neutral loading screen, no gate flash
   if (locationStatus === 'checking') {
@@ -16,8 +14,8 @@ const LocationGate = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
-  // Location is ready or coords exist
-  if (locationStatus === 'ready' || hasLocation) {
+  // Strict render control: app can render only when status is ready
+  if (locationStatus === 'ready') {
     return <>{children}</>;
   }
 
