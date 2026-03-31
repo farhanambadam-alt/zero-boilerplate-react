@@ -9,7 +9,7 @@ export interface LocationData {
   fullAddress?: string;
 }
 
-export type LocationStatus = 'checking' | 'idle' | 'ready';
+export type LocationStatus = 'checking' | 'blocked' | 'ready';
 
 interface LocationContextType {
   location: LocationData;
@@ -80,44 +80,34 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
   const [isLocating, setIsLocating] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
 
-  // Determine initial status: if we have persisted coords, start as 'checking'; otherwise 'idle'
-  const [locationStatus, setLocationStatus] = useState<LocationStatus>(() => {
-    try {
-      const stored = localStorage.getItem('user_location');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (parsed.lat && parsed.lng) return 'checking';
-      }
-    } catch { /* ignore */ }
-    return 'idle';
-  });
+  // Always start as 'checking' — validate real device state before rendering
+  const [locationStatus, setLocationStatus] = useState<LocationStatus>('checking');
 
   useEffect(() => {
     localStorage.setItem('user_location', JSON.stringify(location));
   }, [location]);
 
-  // Startup validation: silently verify location is still accessible.
+  // Startup validation: silently verify real device location state.
   useEffect(() => {
-    if (locationStatus !== 'checking') return;
     if (!navigator.geolocation) {
       localStorage.removeItem('user_location');
       setLocationState(DEFAULT_LOCATION);
-      setLocationStatus('idle');
+      setLocationStatus('blocked');
       return;
     }
 
     navigator.geolocation.getCurrentPosition(
       () => {
-        // Still valid — mark ready
+        // Location is available — keep persisted data, mark ready
         setLocationStatus('ready');
       },
       () => {
-        // Geolocation unavailable — reset
+        // Location unavailable — reset and block
         localStorage.removeItem('user_location');
         setLocationState(DEFAULT_LOCATION);
-        setLocationStatus('idle');
+        setLocationStatus('blocked');
       },
-      { timeout: 5000, maximumAge: 60000 }
+      { enableHighAccuracy: false, timeout: 3000, maximumAge: 60000 }
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Run once on mount only
