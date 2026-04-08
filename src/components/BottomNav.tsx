@@ -45,7 +45,7 @@ const BottomNav = () => {
 
   const hidden = useMemo(() => {
     const p = location.pathname;
-    return p.startsWith('/salon/') || p.startsWith('/booking/') || p.startsWith('/artist/') || p.startsWith('/at-home-booking/');
+    return p.startsWith('/salon/') || p.startsWith('/booking/') || p.startsWith('/artist/') || p.startsWith('/at-home-booking/') || p.startsWith('/staff');
   }, [location.pathname]);
 
   if (hidden) return null;
