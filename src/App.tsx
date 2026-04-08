@@ -28,6 +28,7 @@ const Profile = lazy(() => import("./pages/Profile"));
 const AtHome = lazy(() => import("./pages/AtHome"));
 const ArtistProfile = lazy(() => import("./pages/ArtistProfile"));
 const AtHomeBooking = lazy(() => import("./pages/AtHomeBooking"));
+const StaffDashboard = lazy(() => import("./pages/StaffDashboard"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -66,6 +67,7 @@ const App = () => (
                     <Route path="/at-home" element={<AtHome />} />
                     <Route path="/artist/:id" element={<ArtistProfile />} />
                     <Route path="/at-home-booking/:id" element={<AtHomeBooking />} />
+                    <Route path="/staff" element={<StaffDashboard />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>
